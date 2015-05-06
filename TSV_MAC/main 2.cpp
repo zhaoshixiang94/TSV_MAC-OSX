@@ -52,14 +52,17 @@ void dir_runner(path main_p, ofstream & file_output)
 	for (directory_iterator dir_itr(main_p);
 		dir_itr != directory_iterator();
 		++dir_itr)
-	{
-		if (is_directory(*dir_itr)) dir_runner(*dir_itr, file_output);
-		if (is_regular_file(*dir_itr))
-		{
-			path p = *dir_itr;
-			file_output << p.string() << "\t\t" << file_size(*dir_itr/*p*/) << " bt"
-				<< "\t\t" << p.filename().string() << "\t\t" << hash_counter(p.string()) << endl;
-		}
+    {
+        if (is_directory(*dir_itr)) dir_runner(*dir_itr, file_output);
+        path p = *dir_itr;
+        if(p.filename().string()!=".DS_Store")
+        {
+            if (is_regular_file(*dir_itr))
+            {
+                file_output << p.string() << "\t\t" << file_size(*dir_itr/*p*/) << " bt"
+                << "\t\t" << p.filename().string() << "\t\t" << hash_counter(p.string()) << endl;
+            }
+        }
 
 	}
 	
@@ -110,22 +113,25 @@ void directory_scanner()
 	{
 		if (is_regular_file(*dir_itr))
 		{
-			path p0 = *dir_itr;
-			string s0 = p0.string(); 
-			//s0 = s0.erase(0, main_p.string().length());
-
-			int k = 0; 									// for checking the changed_file
-			for (unsigned int i = 0; i < v_.size()-1; i++)
-			{
-				if ( s0 == v_[i][0] && p0.filename().string() == v_[i][2])
-				{   
-					if (hash_counter(p0.string()) != boost::lexical_cast<unsigned long>(v_[i][3])) std::cout << "File : " << p0.filename().string() << " was changed" << endl;
-					k = 1;
-					v_.erase(v_.begin()+i,v_.begin()+(i+1));
-				}
-			}
-			//find changed_file
-			if (k == 0) cout << "File : " << p0.filename().string() << " is a new file" << endl;
+            path p0 = *dir_itr;
+            if(p0.filename().string()!=".DS_Store")
+            {
+                string s0 = p0.string();
+                //s0 = s0.erase(0, main_p.string().length());
+                
+                int k = 0; 									// for checking the changed_file
+                for (unsigned int i = 0; i < v_.size()-1; i++)
+                {
+                    if ( s0 == v_[i][0] && p0.filename().string() == v_[i][2])
+                    {
+                        if (hash_counter(p0.string()) != boost::lexical_cast<unsigned long>(v_[i][3])) std::cout << "File : " << p0.filename().string() << " was changed" << endl;
+                        k = 1;
+                        v_.erase(v_.begin()+i,v_.begin()+(i+1));
+                    }
+                }
+                //find changed_file
+                if (k == 0) cout << "File : " << p0.filename().string() << " is a new file" << endl;
+            }
 		}
 	}
 
